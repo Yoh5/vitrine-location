@@ -164,5 +164,24 @@ do $$ begin
     'conflicting key value violates exclusion constraint "pas_de_double_reservation"');
 end $$;
 
+\echo '10. Remise à zéro de la démo : réservée au serveur, idempotente, suit le compte relié'
+set role authenticated;
+do $$ begin perform pg_temp.doit_echouer('select reinitialiser_demo()', 'permission denied for function reinitialiser_demo'); end $$;
+reset role;
+set role anon;
+do $$ begin perform pg_temp.doit_echouer('select reinitialiser_demo()', 'permission denied for function reinitialiser_demo'); end $$;
+reset role;
+do $$ begin
+  -- les tests précédents ont sali la base (acceptations, blocages, annulations) : la remise à zéro repart du jeu de démo
+  perform pg_temp.egal(reinitialiser_demo(), 7, 'sept demandes reposées');
+  perform pg_temp.egal((select count(*)::int from indisponibilites), 2, 'deux blocages reposés');
+  perform pg_temp.egal(jsonb_array_length(calendrier(1)), 2, 'Maârif : séjour + blocage');
+  perform pg_temp.egal(reinitialiser_demo(), 7, 'deuxième passage identique');
+  -- sur Supabase le locataire de démo est relié à un vrai compte : ses demandes suivent ce compte
+  update profils set user_id = '33333333-0000-0000-0000-000000000003' where nom = 'Visiteur locataire';
+  perform reinitialiser_demo();
+  perform pg_temp.egal((select count(*)::int from demandes where locataire = '33333333-0000-0000-0000-000000000003'), 2, 'demandes du compte relié');
+end $$;
+
 \echo 'Tous les tests passent.'
 rollback;

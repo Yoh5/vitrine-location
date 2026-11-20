@@ -38,7 +38,7 @@ values ('11111111-0000-0000-0000-000000000002', 'autre', 'Logement d''un autre',
 set role anon;
 do $$ begin
   perform pg_temp.egal((select count(*) from logements), 7::bigint, 'logements visibles');
-  perform pg_temp.egal(jsonb_array_length(calendrier(1)), 1, 'une période prise au Maârif');
+  perform pg_temp.egal(jsonb_array_length(calendrier(1)), 2, 'deux périodes prises au Maârif (séjour + blocage de démo)');
   perform pg_temp.egal(calendrier(1)->0 ? 'locataire', false, 'le calendrier ne dit pas qui');
   perform pg_temp.egal((devis(1, pg_temp.j(40), pg_temp.j(45))->>'total')::int, 2750, 'devis 5 nuits');
   perform pg_temp.egal((devis(1, pg_temp.j(11), pg_temp.j(13))->>'libre')::boolean, false, 'devis sur dates prises');
@@ -128,7 +128,7 @@ declare b jsonb;
 begin
   perform pg_temp.doit_echouer($q$select bloquer(1, pg_temp.j(12), pg_temp.j(20), 'famille')$q$, 'dates_indisponibles');
   b := bloquer(1, pg_temp.j(100), pg_temp.j(103), 'famille');
-  perform pg_temp.egal(jsonb_array_length(calendrier(1)), 2, 'blocage visible au calendrier');
+  perform pg_temp.egal(jsonb_array_length(calendrier(1)), 3, 'blocage visible au calendrier');
   perform pg_temp.connecte('22222222-0000-0000-0000-000000000001');
   perform pg_temp.doit_echouer($q$select demander(1, pg_temp.j(101), pg_temp.j(105), 2)$q$, 'dates_indisponibles');
   perform pg_temp.connecte('11111111-0000-0000-0000-000000000001');

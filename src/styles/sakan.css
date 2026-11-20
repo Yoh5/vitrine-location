@@ -95,7 +95,7 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 
 /* la bande collée en travers */
 .bande {
-  position: absolute; z-index: 2; left: -0.6rem; right: -0.6rem; top: 42%; rotate: -4deg; pointer-events: none;
+  position: absolute; z-index: 2; left: -0.6rem; right: -0.6rem; top: 1.15rem; rotate: -3deg; pointer-events: none;
   background: var(--rouge); color: var(--planche); text-align: center; padding: 0.3rem 0.5rem;
   font-family: var(--f-peint); font-weight: 900; font-size: 1.15rem; letter-spacing: 0.08em; text-transform: uppercase;
   box-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
@@ -226,6 +226,6 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 .pied p { margin: 0; max-width: 90ch; }
 .pied strong { color: var(--facade); }
 
-.bande-collee { top: 3.4rem; left: auto; right: -2.6rem; width: 11rem; rotate: 28deg; animation: coller 420ms var(--ease) both; }
+.bande-collee { position: relative; display: block; top: auto; left: auto; right: auto; margin: 0.7rem -1.4rem 0.9rem; rotate: -1.2deg; animation: coller 420ms var(--ease) both; }
 @keyframes coller { from { opacity: 0; scale: 1.6; } to { opacity: 1; scale: 1; } }
 @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .bande-collee { animation: none; } }

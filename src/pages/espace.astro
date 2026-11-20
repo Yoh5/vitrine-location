@@ -67,7 +67,6 @@ import Sakan from '../layouts/Sakan.astro';
   function fiche(d: Demande, cote: 'locataire' | 'proprietaire', toutes: Demande[] = []): HTMLLIElement {
     const li = el('li', 'fiche-demande');
     // le geste de l'acceptation : la bande LOUÉ se colle sur la fiche qu'on vient d'accepter
-    if (d.id === vientDAccepter) { const b = el('span', 'bande bande-collee', 'Loué'); b.setAttribute('aria-hidden', 'true'); li.append(b); }
     const tete = el('div', 'tete');
     const h = el('h3'); const a = el('a', undefined, d.logement.titre); a.href = `${base}/logement/${d.logement.slug}/`; h.append(a);
     tete.append(h, el('span', `statut s-${d.statut}`, STATUTS[d.statut]));
@@ -76,6 +75,7 @@ import Sakan from '../layouts/Sakan.astro';
       el('p', undefined, `Du ${jour(d.debut)} au ${jour(d.fin)} · ${d.nuits} nuit${d.nuits > 1 ? 's' : ''}`));
     const prix = el('p'); prix.append(el('span', 'prix nombre', dh(d.prix_total)));
     li.append(prix);
+    if (d.id === vientDAccepter) { const b = el('span', 'bande bande-collee', 'Loué'); b.setAttribute('aria-hidden', 'true'); li.append(b); }
     if (d.message) li.append(el('p', 'msg', `« ${d.message} »`));
     if (d.motif && d.statut !== 'acceptee') li.append(el('p', 'calme', `Motif : ${d.motif}`));
     if (d.statut === 'acceptee' && d.autre.telephone) li.append(contact(d.autre.nom, d.autre.telephone));

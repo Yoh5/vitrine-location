@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20T22:20:00+00:00",
+  "title": "Design System: Sakan",
+  "tokens": {
+    "color": {
+      "facade": "#dba83c",
+      "facade-ombre": "#c39232",
+      "facade-claire": "#e8bf63",
+      "planche": "#fdfdfb",
+      "planche-ombre": "#ecebe6",
+      "peinture": "#141210",
+      "peinture-douce": "#423d36",
+      "rouge": "#c41e24",
+      "rouge-fonce": "#9b151a",
+      "nuit": "#1c1712",
+      "vert-ok": "#1f6a43",
+      "surligne": "#fff3b0"
+    },
+    "font": {
+      "peint": "'Big Shoulders Display', 'Arial Narrow', sans-serif",
+      "arabe": "'Marhey', system-ui, sans-serif",
+      "texte": "'Figtree', system-ui, sans-serif"
+    },
+    "radius": { "r": "3px" },
+    "shadow": { "ombre-planche": "0 2px 0 rgb(0 0 0 / 0.04), 0 10px 22px rgb(60 38 10 / 0.28)" },
+    "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
+  },
+  "extensions": {
+    "colorMeta": {
+      "facade": { "role": "primary", "displayName": "Façade ocre" },
+      "planche": { "role": "neutral", "displayName": "Planche peinte" },
+      "peinture": { "role": "neutral", "displayName": "Peinture noire" },
+      "rouge": { "role": "accent", "displayName": "Rouge de bande (pris, prix, action principale)" },
+      "vert-ok": { "role": "tertiary", "displayName": "Tampon accepté" }
+    },
+    "contrast": {
+      "peinture/facade": 8.61,
+      "peinture-douce/facade": 4.96,
+      "peinture-douce/planche": 10.56,
+      "rouge/planche": 5.79,
+      "vert-ok/planche": 6.44,
+      "facade/nuit": 8.2
+    },
+    "rules": [
+      "Une nuit prise : barrée + hachurée + mot « Loué », jamais la couleur seule.",
+      "Le rouge ne sert qu'à « À LOUER », au prix, à la bande LOUÉ et à l'action principale.",
+      "La bande du catalogue recouvre « À LOUER », jamais le prix."
+    ]
+  }
+}

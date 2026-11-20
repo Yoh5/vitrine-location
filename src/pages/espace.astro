@@ -1,0 +1,160 @@
+---
+import Sakan from '../layouts/Sakan.astro';
+---
+<Sakan titre="Mon espace · Sakan (démonstration)" page="espace" prive>
+  <div class="cadre">
+    <div class="espace-tete">
+      <div>
+        <h1 class="titre-peint" id="titre">Mon espace</h1>
+        <p class="role" id="role"></p>
+      </div>
+    </div>
+    <p class="erreur" id="erreur" role="alert" hidden></p>
+
+    <!-- locataire -->
+    <section id="locataire" hidden>
+      <div class="colonnes">
+        <div>
+          <h2>Mes demandes</h2>
+          <ol class="fiches" id="mes-demandes"></ol>
+        </div>
+        <div class="vide">
+          <p><strong>Comment ça marche.</strong> Votre demande attend la réponse du propriétaire. S’il l’accepte, son téléphone
+            apparaît ici et les nuits sont à vous : personne d’autre ne peut plus les prendre. S’il en accepte une autre sur
+            les mêmes dates, la vôtre est refusée automatiquement, avec la raison.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- propriétaire -->
+    <section id="proprietaire" hidden>
+      <div class="colonnes">
+        <div>
+          <h2>Demandes reçues</h2>
+          <ol class="fiches" id="recues"></ol>
+        </div>
+        <div>
+          <h2>Mes logements</h2>
+          <div id="logements"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Sakan>
+
+<script>
+  import {
+    moi, mesDemandes, annuler, demandesRecues, accepter, refuser, mesLogements, bloquer, debloquer,
+    lireSession, message, dh, jour, STATUTS, ErreurSakan, type Demande, type MonLogement,
+  } from '../lib/sakan';
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const $ = (x: string) => document.getElementById(x)!;
+  const err = (t: string | null) => { $('erreur').textContent = t ?? ''; $('erreur').hidden = !t; };
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, txt?: string) => {
+    const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e;
+  };
+  if (!lireSession()) location.replace(`${base}/connexion/?retour=/espace/`);
+
+  function contact(nom: string, tel: string) {
+    const p = el('p', 'contact');
+    const a = el('a', 'btn', `Appeler ${nom.split(' ')[0]}`); a.href = `tel:${tel}`;
+    const w = el('a', 'btn', 'WhatsApp'); w.href = `https://wa.me/212${tel.slice(1)}`; w.target = '_blank'; w.rel = 'noopener';
+    p.append(a, w);
+    return p;
+  }
+
+  function fiche(d: Demande, cote: 'locataire' | 'proprietaire', toutes: Demande[] = []): HTMLLIElement {
+    const li = el('li', 'fiche-demande');
+    const tete = el('div', 'tete');
+    const h = el('h3'); const a = el('a', undefined, d.logement.titre); a.href = `${base}/logement/${d.logement.slug}/`; h.append(a);
+    tete.append(h, el('span', `statut s-${d.statut}`, STATUTS[d.statut]));
+    li.append(tete,
+      el('p', 'qui', cote === 'proprietaire' ? `${d.autre.nom} · ${d.personnes} personne${d.personnes > 1 ? 's' : ''}` : `${d.logement.ville} · chez ${d.autre.nom}`),
+      el('p', undefined, `Du ${jour(d.debut)} au ${jour(d.fin)} · ${d.nuits} nuit${d.nuits > 1 ? 's' : ''}`));
+    const prix = el('p'); prix.append(el('span', 'prix nombre', dh(d.prix_total)));
+    li.append(prix);
+    if (d.message) li.append(el('p', 'msg', `« ${d.message} »`));
+    if (d.motif && d.statut !== 'acceptee') li.append(el('p', 'calme', `Motif : ${d.motif}`));
+    if (d.statut === 'acceptee' && d.autre.telephone) li.append(contact(d.autre.nom, d.autre.telephone));
+    if (d.statut === 'en_attente' && !d.autre.telephone) li.append(el('p', 'calme', 'Le téléphone s’affichera après acceptation.'));
+
+    const actions = el('div', 'actions');
+    if (cote === 'locataire' && (d.statut === 'en_attente' || (d.statut === 'acceptee' && d.debut > new Date().toISOString().slice(0, 10)))) {
+      const b = el('button', 'lien', d.statut === 'acceptee' ? 'Annuler ce séjour' : 'Annuler la demande'); b.type = 'button';
+      b.addEventListener('click', async () => { b.disabled = true; try { await annuler(d.id); charger(); } catch (e) { err(message(e)); b.disabled = false; } });
+      actions.append(b);
+    }
+    if (cote === 'proprietaire' && d.statut === 'en_attente') {
+      const rivales = toutes.filter((x) => x.id !== d.id && x.statut === 'en_attente' && x.logement.id === d.logement.id && x.debut < d.fin && x.fin > d.debut);
+      if (rivales.length) li.append(el('p', 'conflit', `En conflit avec ${rivales.map((x) => `la demande de ${x.autre.nom} (${jour(x.debut)} → ${jour(x.fin)})`).join(' et ')} : accepter celle-ci refusera l’autre automatiquement.`));
+      const ok = el('button', 'btn btn-rouge', 'Accepter'); ok.type = 'button';
+      ok.addEventListener('click', async () => {
+        ok.disabled = true; ok.textContent = 'La base vérifie les dates…';
+        try { const r = await accepter(d.id); err(null); await charger(r.refusees_d_office ? `Accepté. ${r.refusees_d_office} demande en conflit refusée automatiquement.` : 'Accepté.'); }
+        catch (e) { err(message(e)); ok.disabled = false; ok.textContent = 'Accepter'; if (e instanceof ErreurSakan && e.code === 'deja_close') charger(); }
+      });
+      const non = el('button', 'btn', 'Refuser'); non.type = 'button';
+      const form = el('form', 'refus'); form.hidden = true;
+      const inp = el('input'); inp.placeholder = 'Motif (ex. dates déjà prises ailleurs)'; inp.maxLength = 200; inp.setAttribute('aria-label', 'Motif du refus');
+      const conf = el('button', 'btn btn-plein', 'Confirmer le refus'); conf.type = 'submit';
+      form.append(inp, conf);
+      non.addEventListener('click', () => { form.hidden = false; inp.focus(); });
+      form.addEventListener('submit', async (e) => { e.preventDefault(); conf.disabled = true; try { await refuser(d.id, inp.value); charger(); } catch (x) { err(message(x)); conf.disabled = false; } });
+      actions.append(ok, non);
+      li.append(actions, form);
+      return li;
+    }
+    if (actions.childElementCount) li.append(actions);
+    return li;
+  }
+
+  function blocLogement(l: MonLogement): HTMLElement {
+    const div = el('div', 'bloc-logement');
+    const h = el('h3'); const a = el('a', undefined, l.titre); a.href = `${base}/logement/${l.slug}/`; h.append(a);
+    div.append(h, el('p', 'calme', `${l.ville} · ${dh(l.prix_nuit)} la nuit · ${l.en_attente} demande${l.en_attente > 1 ? 's' : ''} en attente`));
+    const ul = el('ul', 'blocages');
+    for (const b of l.blocages) {
+      const li = el('li'); li.append(el('span', undefined, `Bloqué du ${jour(b.debut)} au ${jour(b.fin)}${b.raison ? ` (${b.raison})` : ''}`));
+      const x = el('button', 'lien', 'Débloquer'); x.type = 'button';
+      x.addEventListener('click', async () => { x.disabled = true; try { await debloquer(b.id); charger(); } catch (e) { err(message(e)); x.disabled = false; } });
+      li.append(x); ul.append(li);
+    }
+    const f = el('form', 'form-bloc');
+    const d1 = el('input'); d1.type = 'date'; d1.setAttribute('aria-label', `Bloquer à partir du (${l.titre})`);
+    const d2 = el('input'); d2.type = 'date'; d2.setAttribute('aria-label', `Jusqu’au (${l.titre})`);
+    const r = el('input', 'raison'); r.placeholder = 'Raison (travaux, famille…)'; r.maxLength = 120; r.setAttribute('aria-label', 'Raison du blocage');
+    const b = el('button', 'btn', 'Bloquer ces dates'); b.type = 'submit';
+    f.append(d1, d2, r, b);
+    f.hidden = true;
+    const ouvrir = el('button', 'lien', 'Bloquer des dates'); ouvrir.type = 'button';
+    ouvrir.setAttribute('aria-expanded', 'false');
+    ouvrir.addEventListener('click', () => { f.hidden = !f.hidden; ouvrir.setAttribute('aria-expanded', String(!f.hidden)); if (!f.hidden) d1.focus(); });
+    f.addEventListener('submit', async (e) => { e.preventDefault(); b.disabled = true; try { await bloquer(l.id, d1.value, d2.value, r.value); charger(); } catch (x) { err(message(x)); b.disabled = false; } });
+    div.append(ul, ouvrir, f);
+    return div;
+  }
+
+  async function charger(info?: string) {
+    try {
+      const m = await moi();
+      $('titre').textContent = m.role === 'proprietaire' ? 'Espace propriétaire' : 'Espace locataire';
+      $('role').textContent = info ?? `Connecté : ${m.nom}`;
+      if (m.role === 'locataire') {
+        $('locataire').hidden = false;
+        const ds = await mesDemandes();
+        $('mes-demandes').replaceChildren(...(ds.length ? ds.map((d) => fiche(d, 'locataire')) : [Object.assign(el('li', 'vide'), { innerHTML: `Aucune demande. <a href="${base}/">Choisissez un logement</a> et vos dates.` })]));
+      } else {
+        $('proprietaire').hidden = false;
+        const [ds, ls] = await Promise.all([demandesRecues(), mesLogements()]);
+        const ordre = (x: Demande) => (x.statut === 'en_attente' ? 0 : x.statut === 'acceptee' ? 1 : 2);
+        ds.sort((a, b) => ordre(a) - ordre(b) || a.debut.localeCompare(b.debut));
+        $('recues').replaceChildren(...ds.map((d) => fiche(d, 'proprietaire', ds)));
+        $('logements').replaceChildren(...ls.map(blocLogement));
+      }
+    } catch (e) {
+      if (e instanceof ErreurSakan && (e.code === 'non_connecte' || e.code === 'acces_refuse')) { location.replace(`${base}/connexion/?retour=/espace/`); return; }
+      err(message(e));
+    }
+  }
+  if (lireSession()) charger();
+</script>

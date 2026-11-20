@@ -26,6 +26,13 @@ begin
   insert into demandes (logement_id, locataire, debut, fin, personnes, prix_total, detail_prix, message, statut, motif, decide_le)
   select 4, m, j + 5, j + 8, 6, (calculer_prix(4, j + 5, j + 8)->>'total')::int, calculer_prix(4, j + 5, j + 8),
          '', 'refusee', 'six personnes pour cinq couchages', now() - interval '1 day';
+  -- le locataire de DÉMO a déjà un séjour accepté (téléphone du propriétaire visible) et une demande en attente
+  insert into demandes (logement_id, locataire, debut, fin, personnes, prix_total, detail_prix, message, statut, decide_le)
+  select 2, '22222222-0000-0000-0000-000000000001', j + 40, j + 54, 1, (calculer_prix(2, j + 40, j + 54)->>'total')::int,
+         calculer_prix(2, j + 40, j + 54), 'Stage de deux semaines à Rabat.', 'acceptee', now() - interval '2 days';
+  insert into demandes (logement_id, locataire, debut, fin, personnes, prix_total, detail_prix, message)
+  select 4, '22222222-0000-0000-0000-000000000001', j + 70, j + 77, 3, (calculer_prix(4, j + 70, j + 77)->>'total')::int,
+         calculer_prix(4, j + 70, j + 77), 'Une semaine au bord de la mer en famille.';
   -- le propriétaire bloque Chefchaouen pour travaux
   insert into indisponibilites (logement_id, debut, fin, raison) values (5, j + 3, j + 9, 'peinture');
 end $$;

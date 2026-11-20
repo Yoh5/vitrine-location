@@ -1,0 +1,225 @@
+/* Sakan — le panneau « À LOUER » peint sur la façade, la bande « LOUÉ » collée en travers.
+   Façade ocre engagée, planches blanches peintes, noir et rouge de peinture ; la bande rouge ne dit qu'une
+   chose : « pris ». Une nuit prise est aussi hachurée et barrée : lisible sans la couleur. */
+
+:root {
+  --facade: #dba83c;
+  --facade-ombre: #c39232;
+  --facade-claire: #e8bf63;
+  --planche: #fdfdfb;
+  --planche-ombre: #ecebe6;
+  --peinture: #141210;
+  --peinture-douce: #4d4840;
+  --rouge: #c41e24;
+  --rouge-fonce: #9b151a;
+  --nuit: #1c1712;
+  --vert-ok: #1f6a43;
+  --surligne: #fff3b0;
+
+  --f-peint: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --f-arabe: 'Marhey', system-ui, sans-serif;
+  --f-texte: 'Figtree', system-ui, sans-serif;
+  --r: 3px;
+  --ombre-planche: 0 2px 0 rgb(0 0 0 / 0.04), 0 10px 22px rgb(60 38 10 / 0.28);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scrollbar-color: var(--facade-ombre) var(--facade-claire); }
+body { margin: 0; min-height: 100dvh; display: flex; flex-direction: column; background: var(--facade); color: var(--peinture); font-family: var(--f-texte); font-size: 1rem; line-height: 1.5; }
+::selection { background: var(--peinture); color: var(--facade-claire); }
+:focus-visible { outline: 3px solid var(--peinture); outline-offset: 3px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+input, textarea { caret-color: var(--rouge); }
+a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1.5px; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.cadre { width: min(100% - 2rem, 1280px); margin-inline: auto; }
+.nombre { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- la rue (en-tête) */
+.rue { background: var(--nuit); color: var(--facade-claire); }
+.rue-cadre { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4rem; flex-wrap: wrap; }
+.enseigne { display: inline-flex; align-items: baseline; gap: 0.6rem; text-decoration: none; }
+.enseigne-latin { font-family: var(--f-peint); font-weight: 900; font-size: 2rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--facade); line-height: 1; }
+.enseigne-arabe { font-family: var(--f-arabe); font-weight: 700; font-size: 1.5rem; color: var(--planche); line-height: 1; }
+.nav { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+.nav a, .sortir { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 0.75rem; border-radius: var(--r); color: var(--planche); text-decoration: none; font-weight: 600; background: none; border: 0; cursor: pointer; }
+.nav a:hover, .sortir:hover { background: rgb(255 255 255 / 0.08); }
+.nav a[aria-current='page'] { color: var(--facade); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.35em; }
+.rue :focus-visible { outline-color: var(--facade); }
+
+/* ---------------------------------------------------------------- façade */
+.facade { flex: 1; padding-block: 2rem 4rem; }
+.titre-peint { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; line-height: 0.95; margin: 0; }
+h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
+.chapeau { max-width: 60ch; font-size: 1.08rem; margin: 0.8rem 0 0; color: var(--peinture); }
+.calme { color: var(--peinture-douce); }
+
+/* ---------------------------------------------------------------- boutons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 48px; padding-inline: 1.2rem; border-radius: var(--r); border: 2px solid var(--peinture); font-weight: 800; text-decoration: none; cursor: pointer; background: var(--planche); color: var(--peinture); transition: background 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-rouge { background: var(--rouge); border-color: var(--rouge); color: var(--planche); }
+.btn-rouge:hover:not(:disabled) { background: var(--rouge-fonce); border-color: var(--rouge-fonce); }
+.btn-plein { background: var(--peinture); color: var(--planche); }
+.btn-plein:hover:not(:disabled) { background: #000; }
+.btn:hover:not(:disabled):not(.btn-rouge):not(.btn-plein) { background: var(--peinture); color: var(--planche); }
+.lien { background: none; border: 0; padding: 0; min-height: 44px; font-weight: 700; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+
+/* ---------------------------------------------------------------- le panneau peint */
+.panneau {
+  position: relative; background: var(--planche); border: 4px solid var(--peinture); border-radius: 2px;
+  padding: 1rem 1.1rem 1.1rem; box-shadow: var(--ombre-planche); display: grid; gap: 0.35rem; align-content: start;
+}
+.panneau::before, .panneau::after { /* deux clous peints qui tiennent la planche */
+  content: ''; position: absolute; top: 0.45rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--peinture-douce);
+}
+.panneau::before { left: 0.45rem; } .panneau::after { right: 0.45rem; }
+.a-louer { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; color: var(--rouge); }
+.a-louer .titre-peint { font-size: 2.3rem; }
+.a-louer .arabe { font-family: var(--f-arabe); font-weight: 700; font-size: 1.7rem; line-height: 1; }
+.panneau h1, .panneau h2, .panneau h3 { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.45rem; line-height: 1; margin: 0.15rem 0 0; letter-spacing: 0.01em; }
+.panneau .lieu { margin: 0; font-weight: 700; }
+.panneau .gabarit { margin: 0; color: var(--peinture-douce); font-size: 0.95rem; }
+.prix-peint { margin: 0.35rem 0 0; font-family: var(--f-peint); font-weight: 900; font-size: 1.9rem; line-height: 1; color: var(--rouge); text-transform: uppercase; }
+.prix-peint small { font-size: 0.95rem; color: var(--peinture); letter-spacing: 0.02em; }
+.tarifs { margin: 0; font-size: 0.92rem; color: var(--peinture-douce); }
+.panneau .plan { position: absolute; right: 1rem; bottom: 4.6rem; width: 5.2rem; opacity: 0.9; }
+@media (max-width: 479px) { .panneau .plan { display: none; } }  /* sur téléphone, le plan reste sur la fiche */
+
+/* la bande collée en travers */
+.bande {
+  position: absolute; z-index: 2; left: -0.6rem; right: -0.6rem; top: 42%; rotate: -4deg; pointer-events: none;
+  background: var(--rouge); color: var(--planche); text-align: center; padding: 0.3rem 0.5rem;
+  font-family: var(--f-peint); font-weight: 900; font-size: 1.15rem; letter-spacing: 0.08em; text-transform: uppercase;
+  box-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+}
+.bande::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 9px, rgb(255 255 255 / 0.18) 9px 11px); }
+
+/* ---------------------------------------------------------------- catalogue */
+.catalogue { display: grid; gap: 2rem; align-items: start; margin-block-start: 2rem; }
+@media (min-width: 1040px) { .catalogue { grid-template-columns: minmax(0, 1fr) 22rem; } .carte-bloc { position: sticky; top: 1.5rem; } }
+.panneaux { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2rem 1.75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); }
+.panneaux > li { rotate: var(--penche, 0deg); }
+.panneaux > li:nth-child(3n + 1) { --penche: -0.8deg; } .panneaux > li:nth-child(3n + 2) { --penche: 0.6deg; } .panneaux > li:nth-child(3n) { --penche: -0.3deg; }
+.panneaux .btn { margin-top: 0.6rem; width: 100%; }
+
+.carte-bloc { background: var(--facade-claire); border: 2px solid var(--peinture); border-radius: 2px; padding: 0.8rem; }
+.carte-bloc h2 { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; margin: 0 0 0.5rem; font-size: 1.3rem; }
+.carte { display: block; width: 100%; height: auto; }
+.carte .terre { fill: var(--planche); stroke: var(--peinture); stroke-width: 2; stroke-linejoin: round; }
+.carte .epingle circle { fill: var(--rouge); stroke: var(--planche); stroke-width: 2; }
+.carte .epingle text { font: 700 14px var(--f-texte); fill: var(--peinture); paint-order: stroke; stroke: var(--planche); stroke-width: 4px; }
+.carte a:hover circle, .carte a:focus-visible circle { fill: var(--peinture); }
+.carte-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--peinture-douce); }
+
+/* ---------------------------------------------------------------- fiche logement */
+.fiche { display: grid; gap: 2rem; align-items: start; }
+@media (min-width: 1040px) { .fiche { grid-template-columns: minmax(0, 1fr) minmax(0, 27rem); } .reservation { position: sticky; top: 1.5rem; } }
+.fiche .panneau { padding: 1.4rem 1.6rem 1.6rem; }
+.fiche .description { max-width: 62ch; margin: 0.6rem 0 0; font-size: 1.05rem; }
+.fiche .plan-grand { margin-top: 1rem; max-width: 16rem; color: var(--peinture); }
+@media (max-width: 1039px) { .fiche .plan-grand { max-width: 9rem; } }
+.equipements { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin: 0.6rem 0 0; padding: 0; list-style: none; font-weight: 600; }
+.retour { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; margin-block-end: 0.75rem; }
+
+.reservation { background: var(--planche); border: 4px solid var(--peinture); border-radius: 2px; padding: 1.1rem; box-shadow: var(--ombre-planche); }
+.reservation h2 { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.6rem; margin: 0; line-height: 1; }
+.reservation .aide { margin: 0.35rem 0 0.9rem; color: var(--peinture-douce); font-size: 0.95rem; }
+
+/* le calendrier : chaque nuit prise porte sa bande */
+.calendrier { display: grid; gap: 1.2rem; }
+.mois-tete { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.mois-tete h3 { margin: 0; font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.25rem; }
+.mois-nav { display: flex; gap: 0.3rem; }
+.mois-nav button { width: 44px; height: 44px; border: 2px solid var(--peinture); border-radius: var(--r); background: var(--planche); cursor: pointer; font-weight: 900; }
+.mois-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+.grille { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.grille .jsem { text-align: center; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--peinture-douce); padding-block-end: 0.2rem; }
+.jour {
+  position: relative; aspect-ratio: 1; min-height: 40px; display: grid; place-items: center; border: 1px solid var(--planche-ombre);
+  background: var(--planche); border-radius: 2px; font-weight: 700; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.jour:hover:not(:disabled) { border-color: var(--peinture); }
+.jour:disabled { cursor: default; }
+.jour.passe { color: #b3ada3; background: transparent; border-color: transparent; }
+.jour.pris { color: var(--peinture-douce); text-decoration: line-through; text-decoration-thickness: 2px;
+  background: repeating-linear-gradient(135deg, var(--planche) 0 5px, #e3ded6 5px 7px); }
+.jour.choisi { background: var(--peinture); color: var(--planche); border-color: var(--peinture); }
+.jour.dans { background: var(--surligne); border-color: #e2cf6a; }
+.jour.aujourdhui { box-shadow: inset 0 -3px 0 var(--rouge); }
+.bande-jours {
+  z-index: 1; pointer-events: none; align-self: center; height: 1.35rem; rotate: -3deg; margin-inline: -2px;
+  background: var(--rouge); color: var(--planche); display: grid; place-items: center; overflow: hidden;
+  font-family: var(--f-peint); font-weight: 900; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.22);
+}
+.legende { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.85rem; color: var(--peinture-douce); }
+.legende span { display: inline-block; width: 1.4rem; height: 0.8rem; vertical-align: -0.1rem; margin-inline-end: 0.35rem; border-radius: 1px; }
+.legende .l-pris { background: var(--rouge); } .legende .l-choisi { background: var(--surligne); border: 1px solid #e2cf6a; }
+
+.devis { margin-top: 1rem; border-top: 3px solid var(--peinture); padding-top: 0.8rem; display: grid; gap: 0.35rem; }
+.devis .dates { margin: 0; font-weight: 800; }
+.devis ul { margin: 0; padding: 0; list-style: none; color: var(--peinture-douce); }
+.devis .total { display: flex; align-items: baseline; justify-content: space-between; margin: 0.2rem 0 0; }
+.devis .total strong { font-family: var(--f-peint); font-weight: 900; font-size: 2rem; color: var(--rouge); line-height: 1; }
+.devis .economie { margin: 0; color: var(--vert-ok); font-weight: 700; font-size: 0.95rem; }
+.devis .compte-base { margin: 0; font-size: 0.8rem; color: var(--peinture-douce); }
+.champ { display: grid; gap: 0.3rem; margin-top: 0.8rem; }
+.champ label { font-weight: 700; }
+.champ input, .champ select, .champ textarea { min-height: 48px; padding: 0.55rem 0.8rem; border: 2px solid var(--peinture-douce); border-radius: var(--r); background: var(--planche); }
+.champ textarea { min-height: 5rem; resize: vertical; }
+.champ :focus { border-color: var(--peinture); }
+.erreur { color: var(--rouge-fonce); font-weight: 700; margin: 0.6rem 0 0; }
+.succes { color: var(--vert-ok); font-weight: 700; margin: 0.6rem 0 0; }
+.reservation .btn-rouge { width: 100%; margin-top: 0.9rem; }
+
+/* ---------------------------------------------------------------- espaces */
+.espace-tete { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.role { margin: 0.2rem 0 0; font-weight: 700; }
+.colonnes { display: grid; gap: 2rem; margin-top: 1.5rem; align-items: start; }
+@media (min-width: 1040px) { .colonnes { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
+.colonnes h2 { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.6rem; margin: 0 0 0.8rem; }
+.fiches { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.fiche-demande { background: var(--planche); border: 3px solid var(--peinture); border-radius: 2px; padding: 0.9rem 1rem; box-shadow: var(--ombre-planche); position: relative; overflow: hidden; }
+.fiche-demande .tete { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+.fiche-demande h3 { margin: 0; font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.2rem; line-height: 1.05; }
+.fiche-demande p { margin: 0.25rem 0 0; }
+.fiche-demande .qui { font-weight: 700; }
+.fiche-demande .msg { font-style: italic; color: var(--peinture-douce); }
+.fiche-demande .prix { font-family: var(--f-peint); font-weight: 900; font-size: 1.35rem; color: var(--rouge); }
+.statut { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; font-size: 1rem; padding: 0.05rem 0.5rem; border: 2px solid currentColor; border-radius: 2px; rotate: -2deg; white-space: nowrap; }
+.s-en_attente { color: var(--peinture-douce); border-style: dashed; }
+.s-acceptee { color: var(--vert-ok); }
+.s-refusee, .s-annulee { color: var(--rouge-fonce); }
+.conflit { margin-top: 0.5rem !important; padding: 0.5rem 0.7rem; border-left: 0; background: #fbe4e3; color: var(--rouge-fonce); font-weight: 700; font-size: 0.92rem; border-radius: 2px; }
+.contact { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin-top: 0.75rem; }
+.refus { display: grid; gap: 0.4rem; margin-top: 0.6rem; }
+.refus input { min-height: 44px; padding-inline: 0.7rem; border: 2px solid var(--peinture-douce); border-radius: var(--r); background: var(--planche); }
+.bloc-logement { background: var(--planche); border: 3px solid var(--peinture); border-radius: 2px; padding: 0.9rem 1rem; }
+.bloc-logement + .bloc-logement { margin-top: 1rem; }
+.bloc-logement h3 { margin: 0; font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
+.blocages { list-style: none; padding: 0; margin: 0.4rem 0 0; display: grid; gap: 0.3rem; }
+.blocages li { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.form-bloc { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.6rem; }
+.form-bloc input { min-height: 44px; padding-inline: 0.6rem; border: 2px solid var(--peinture-douce); border-radius: var(--r); background: var(--planche); min-width: 0; }
+.form-bloc .raison { grid-column: 1 / -1; }
+.form-bloc button { grid-column: 1 / -1; }
+.vide { padding: 1rem; border: 2px dashed var(--peinture); border-radius: 2px; background: var(--facade-claire); }
+
+/* ---------------------------------------------------------------- connexion */
+.porte { display: grid; gap: 2rem; align-items: start; margin-top: 1.5rem; }
+@media (min-width: 900px) { .porte { grid-template-columns: 1fr 1fr; } }
+.porte .panneau { padding: 1.3rem 1.4rem; }
+.porte .panneau p { margin: 0.2rem 0 0.6rem; }
+.porte form { display: grid; gap: 0.2rem; }
+
+/* ---------------------------------------------------------------- pied */
+.pied { background: var(--nuit); color: #d9d2c6; padding-block: 1.3rem 4.5rem; font-size: 0.88rem; }
+.pied p { margin: 0; max-width: 90ch; }
+.pied strong { color: var(--facade); }
+
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }

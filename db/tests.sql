@@ -71,12 +71,12 @@ do $$
 declare d jsonb;
 begin
   perform pg_temp.egal(moi()->>'role', 'locataire', 'rôle');
-  d := demander(2, pg_temp.j(40), pg_temp.j(47), 1, 'Stage de deux semaines');
+  d := demander(2, pg_temp.j(60), pg_temp.j(67), 1, 'Stage de deux semaines');
   perform pg_temp.egal(d->>'statut', 'en_attente', 'demande envoyée');
   perform pg_temp.egal((d->>'prix_total')::int, 2100, 'prix calculé par la base (1 semaine)');
   perform pg_temp.egal(d->'autre'->'telephone', 'null'::jsonb, 'téléphone du propriétaire caché avant acceptation');
   perform pg_temp.egal(d->'autre'->>'nom', 'Hajja Fatima Bennani', 'nom du propriétaire visible');
-  perform pg_temp.doit_echouer($q$select demander(2, pg_temp.j(42), pg_temp.j(49), 1)$q$, 'demande_deja_envoyee');
+  perform pg_temp.doit_echouer($q$select demander(2, pg_temp.j(62), pg_temp.j(69), 1)$q$, 'demande_deja_envoyee');
   perform pg_temp.doit_echouer($q$select demander(1, pg_temp.j(12), pg_temp.j(14), 2)$q$, 'dates_indisponibles');   -- séjour accepté
   perform pg_temp.doit_echouer($q$select demander(5, pg_temp.j(4), pg_temp.j(6), 2)$q$, 'dates_indisponibles');     -- blocage
   perform pg_temp.doit_echouer($q$select demander(1, pg_temp.j(-3), pg_temp.j(2), 2)$q$, 'date_passee');
@@ -87,7 +87,7 @@ begin
   perform pg_temp.doit_echouer($q$select demander(1, pg_temp.j(50), pg_temp.j(52), 2, repeat('x', 501))$q$, 'message_trop_long');
   perform pg_temp.doit_echouer($q$select demandes_recues()$q$, 'reserve_aux_proprietaires');
   perform pg_temp.doit_echouer($q$select accepter(1)$q$, 'demande_introuvable');
-  perform pg_temp.egal(jsonb_array_length(mes_demandes()), 1, 'il ne voit que SES demandes');
+  perform pg_temp.egal(jsonb_array_length(mes_demandes()), 3, 'il ne voit que SES demandes (2 de démo + la nouvelle)');
 end $$;
 
 \echo '4. Le propriétaire accepte : l''autre demande en conflit est refusée d''office'
@@ -140,7 +140,7 @@ end $$;
 \echo '7. Le locataire annule ; il ne peut pas annuler la demande d''un autre'
 select pg_temp.connecte('22222222-0000-0000-0000-000000000001') \g /dev/null
 do $$
-declare mienne int := (select (x->>'id')::int from jsonb_array_elements(mes_demandes()) x where (x->'logement'->>'id')::int = 2);
+declare mienne int := (select (x->>'id')::int from jsonb_array_elements(mes_demandes()) x where (x->'logement'->>'id')::int = 2 and x->>'statut' = 'en_attente');
 begin
   perform pg_temp.egal(annuler(mienne)->>'statut', 'annulee', 'annulée');
   perform pg_temp.doit_echouer(format('select annuler(%s)', mienne), 'deja_close');

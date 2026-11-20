@@ -1,0 +1,128 @@
+---
+import Sakan from '../../layouts/Sakan.astro';
+import Panneau from '../../components/Panneau.astro';
+import Plan from '../../components/Plan.astro';
+import { logements, dh, type Logement } from '../../lib/sakan';
+
+export async function getStaticPaths() {
+  return (await logements()).map((l) => ({ params: { slug: l.slug }, props: { l } }));
+}
+const { l } = Astro.props as { l: Logement };
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Sakan titre={`${l.titre} · ${l.ville} · Sakan (démonstration)`} description={`${l.titre} à ${l.ville}, ${dh(l.prix_nuit)} la nuit. Démonstration.`} page="logements">
+  <div class="cadre">
+    <a class="retour" href={`${base}/`}>← Tous les logements</a>
+    <div class="fiche">
+      <div>
+        <Panneau l={l} niveau="h1" lien={false} />
+        <p class="description">{l.description}</p>
+        <ul class="equipements">
+          <li>{l.capacite} couchage{l.capacite > 1 ? 's' : ''}</li>
+          <li>{l.chambres ? `${l.chambres} chambre${l.chambres > 1 ? 's' : ''}` : 'Studio'}</li>
+          <li>Séjour de {l.sejour_min} nuit{l.sejour_min > 1 ? 's' : ''} au moins</li>
+        </ul>
+        <Plan chambres={l.chambres} class="plan-grand" titre={l.titre} />
+        <p class="calme">Plan schématique : la démonstration ne montre aucune photo de vrai logement.</p>
+      </div>
+
+      <section class="reservation" aria-labelledby="titre-dates" data-id={l.id} data-capacite={l.capacite} data-slug={l.slug}>
+        <h2 id="titre-dates">Vos dates</h2>
+        <p class="aide">Touchez le jour d’arrivée, puis le jour de départ. Les nuits barrées d’une bande sont déjà louées.</p>
+        <div class="calendrier" id="calendrier"><p class="calme">Lecture du calendrier…</p></div>
+        <ul class="legende" aria-hidden="true"><li><span class="l-pris"></span>loué ou bloqué</li><li><span class="l-choisi"></span>votre séjour</li></ul>
+
+        <div class="devis" id="devis" aria-live="polite" hidden>
+          <p class="dates" id="d-dates"></p>
+          <ul id="d-detail"></ul>
+          <p class="total"><span>Total, calculé par la base</span><strong id="d-total" class="nombre"></strong></p>
+          <p class="economie" id="d-eco" hidden></p>
+        </div>
+
+        <form id="demande" hidden novalidate>
+          <div class="champ">
+            <label for="personnes">Nombre de personnes</label>
+            <select id="personnes">{Array.from({ length: l.capacite }, (_, i) => <option value={i + 1} selected={i === Math.min(1, l.capacite - 1)}>{i + 1}</option>)}</select>
+          </div>
+          <div class="champ">
+            <label for="message">Un mot pour le propriétaire (facultatif)</label>
+            <textarea id="message" maxlength="500" placeholder="Heure d’arrivée, raison du séjour…"></textarea>
+          </div>
+          <button class="btn btn-rouge" type="submit" id="envoyer">Demander ces dates</button>
+          <p class="calme" id="note-connexion" hidden>Il faut un compte locataire : <a href={`${base}/connexion/?retour=/logement/${l.slug}/`}>entrez avec le compte de démonstration</a>.</p>
+        </form>
+        <p class="erreur" id="erreur" role="alert" hidden></p>
+        <p class="succes" id="succes" role="status" hidden></p>
+      </section>
+    </div>
+  </div>
+</Sakan>
+
+<script>
+  import { calendrier, devis, demander, lireSession, message, dh, jour, detailPrix, ErreurSakan } from '../../lib/sakan';
+  import { monterCalendrier, type Choix } from '../../lib/calendrier';
+
+  const sec = document.querySelector<HTMLElement>('.reservation')!;
+  const id = Number(sec.dataset.id);
+  const $ = (x: string) => document.getElementById(x)!;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  let choix: Choix = { debut: null, fin: null };
+  let tour = 0;
+  let cal: ReturnType<typeof monterCalendrier> | null = null;
+
+  function erreur(t: string | null) { $('erreur').textContent = t ?? ''; $('erreur').hidden = !t; }
+
+  async function changer(c: Choix) {
+    choix = c; erreur(null); $('succes').hidden = true;
+    const t = ++tour;
+    if (!c.debut || !c.fin) {
+      $('devis').hidden = true; $('demande').hidden = true;
+      if (c.debut) { $('d-dates').textContent = `Arrivée le ${jour(c.debut)} : touchez le jour de départ.`; $('devis').hidden = false; $('d-detail').replaceChildren(); $('d-total').textContent = ''; $('d-eco').hidden = true; }
+      return;
+    }
+    try {
+      const d = await devis(id, c.debut, c.fin);
+      if (t !== tour) return;
+      $('d-dates').textContent = `Du ${jour(c.debut)} au ${jour(c.fin)} · ${d.nuits} nuit${d.nuits > 1 ? 's' : ''}`;
+      $('d-detail').replaceChildren(...detailPrix(d).map((x) => { const li = document.createElement('li'); li.textContent = x; return li; }));
+      $('d-total').textContent = dh(d.total);
+      const eco = d.sans_remise - d.total;
+      $('d-eco').textContent = `Soit ${dh(eco)} de moins qu’au tarif de la nuit.`;
+      $('d-eco').hidden = eco <= 0;
+      $('devis').hidden = false; $('demande').hidden = false;
+      const connecte = !!lireSession();
+      $('note-connexion').hidden = connecte;
+      ($('envoyer') as HTMLButtonElement).textContent = connecte ? 'Demander ces dates' : 'Se connecter pour demander';
+      if (!d.libre) erreur('Ces dates viennent d’être prises : choisissez-en d’autres.');
+    } catch (e) {
+      if (t !== tour) return;
+      $('devis').hidden = true; $('demande').hidden = true;
+      erreur(message(e));
+    }
+  }
+
+  $('demande').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!choix.debut || !choix.fin) return;
+    if (!lireSession()) { location.href = `${base}/connexion/?retour=${encodeURIComponent(location.pathname)}`; return; }
+    const b = $('envoyer') as HTMLButtonElement;
+    b.disabled = true; b.textContent = 'La base vérifie les dates…'; erreur(null);
+    try {
+      const r = await demander(id, choix.debut, choix.fin, Number(($('personnes') as HTMLSelectElement).value), ($('message') as HTMLTextAreaElement).value);
+      $('succes').textContent = `Demande envoyée : ${dh(r.prix_total)} pour ${r.nuits} nuit${r.nuits > 1 ? 's' : ''}. Le propriétaire répond depuis son espace ; suivez-la dans « Mon espace ».`;
+      $('succes').hidden = false; $('demande').hidden = true;
+    } catch (x) {
+      erreur(message(x));
+      if (x instanceof ErreurSakan && x.code === 'dates_indisponibles') {
+        const prises = await calendrier(id).catch(() => []);
+        prises.forEach((p) => cal?.marquerPris(p));
+      }
+      if (x instanceof ErreurSakan && x.code === 'non_connecte') location.href = `${base}/connexion/?retour=${encodeURIComponent(location.pathname)}`;
+    } finally {
+      b.disabled = false; b.textContent = 'Demander ces dates';
+    }
+  });
+
+  calendrier(id).then((prises) => { cal = monterCalendrier($('calendrier'), prises, changer); })
+    .catch((e) => { $('calendrier').textContent = message(e); });
+</script>

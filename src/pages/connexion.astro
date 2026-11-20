@@ -1,0 +1,58 @@
+---
+import Sakan from '../layouts/Sakan.astro';
+const demo = {
+  proprietaire: [import.meta.env.PUBLIC_DEMO_PROPRIETAIRE_EMAIL ?? '', import.meta.env.PUBLIC_DEMO_PROPRIETAIRE_MOT_DE_PASSE ?? ''],
+  locataire: [import.meta.env.PUBLIC_DEMO_LOCATAIRE_EMAIL ?? '', import.meta.env.PUBLIC_DEMO_LOCATAIRE_MOT_DE_PASSE ?? ''],
+};
+---
+<Sakan titre="Se connecter · Sakan (démonstration)" page="connexion" prive>
+  <div class="cadre">
+    <h1 class="titre-peint">Entrer dans Sakan</h1>
+    <p class="chapeau">Deux comptes de démonstration, un pour chaque côté de la location. Essayez les deux : demandez des dates
+      en locataire, puis acceptez-les en propriétaire.</p>
+    <div class="porte">
+      <div class="panneau">
+        <h2>Je loue mon logement</h2>
+        <p>Hajja Fatima, propriétaire de six logements : demandes reçues, conflits signalés, dates bloquées.</p>
+        <button class="btn btn-plein" type="button" data-demo="proprietaire" data-email={demo.proprietaire[0]} data-mdp={demo.proprietaire[1]}>Entrer comme propriétaire</button>
+      </div>
+      <div class="panneau">
+        <h2>Je cherche un logement</h2>
+        <p>Un locataire de démonstration : demandez des dates, suivez vos demandes, annulez.</p>
+        <button class="btn btn-plein" type="button" data-demo="locataire" data-email={demo.locataire[0]} data-mdp={demo.locataire[1]}>Entrer comme locataire</button>
+      </div>
+    </div>
+    <form class="porte" id="form" novalidate style="margin-top:2rem">
+      <div class="panneau">
+        <h2>Avec un autre compte</h2>
+        <div class="champ"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" /></div>
+        <div class="champ"><label for="mdp">Mot de passe</label><input id="mdp" type="password" autocomplete="current-password" /></div>
+        <button class="btn btn-rouge" type="submit" id="entrer" style="margin-top:0.9rem">Entrer</button>
+        <p class="erreur" id="erreur" role="alert" hidden></p>
+      </div>
+    </form>
+  </div>
+</Sakan>
+
+<script>
+  import { connecter, message } from '../lib/sakan';
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const retour = new URLSearchParams(location.search).get('retour');
+  const dest = retour && retour.startsWith('/') && !retour.startsWith('//') ? `${base}${retour}` : `${base}/espace/`;
+  const err = document.getElementById('erreur')!;
+  async function entrer(email: string, mdp: string, b: HTMLButtonElement) {
+    err.hidden = true;
+    if (!email || !mdp) { err.textContent = 'Indiquez l’e-mail et le mot de passe.'; err.hidden = false; return; }
+    const t = b.textContent; b.disabled = true; b.textContent = 'Vérification…';
+    try { await connecter(email, mdp); location.href = dest; }
+    catch (e) { err.textContent = message(e); err.hidden = false; b.disabled = false; b.textContent = t; }
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-demo]').forEach((b) => b.addEventListener('click', () => {
+    if (!b.dataset.email) { err.textContent = 'Comptes de démonstration non configurés sur cette copie.'; err.hidden = false; return; }
+    entrer(b.dataset.email, b.dataset.mdp ?? '', b);
+  }));
+  document.getElementById('form')!.addEventListener('submit', (e) => {
+    e.preventDefault();
+    entrer((document.getElementById('email') as HTMLInputElement).value, (document.getElementById('mdp') as HTMLInputElement).value, document.getElementById('entrer') as HTMLButtonElement);
+  });
+</script>

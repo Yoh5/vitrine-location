@@ -1,0 +1,27 @@
+---
+// Plan d'étage dessiné au trait, déduit du nombre de chambres : il remplace les photos (aucune photo de vrai
+// logement dans une démonstration fictive). Séjour, cuisine, salle d'eau et N chambres, toujours la même règle.
+interface Props { chambres: number; class?: string; titre: string }
+const { chambres, class: cls, titre } = Astro.props;
+const n = Math.max(0, Math.min(chambres, 4));
+const W = 120, H = 90;
+const largeurCh = n ? W / n : 0;
+---
+<svg class={cls} viewBox={`-2 -2 ${W + 4} ${H + 4}`} role="img" aria-label={`Plan schématique : ${titre}, ${n ? `${n} chambre${n > 1 ? 's' : ''}` : 'studio'}, séjour, cuisine et salle d'eau`}>
+  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+    <rect x="0" y="0" width={W} height={H} stroke-width="3" />
+    {n > 0 && <line x1="0" y1="38" x2={W} y2="38" />}
+    {Array.from({ length: Math.max(n - 1, 0) }, (_, i) => <line x1={largeurCh * (i + 1)} y1="0" x2={largeurCh * (i + 1)} y2="38" />)}
+    <line x1="78" y1={n ? 38 : 0} x2="78" y2={H} />
+    <line x1="78" y1="66" x2={W} y2="66" />
+    {/* portes : un quart de cercle par pièce */}
+    {Array.from({ length: n }, (_, i) => <path d={`M ${largeurCh * i + 6} 38 a 10 10 0 0 1 10 -10`} stroke-width="1.2" />)}
+    <path d="M 78 52 a 10 10 0 0 1 10 -10" stroke-width="1.2" />
+  </g>
+  <g font-size="9" font-weight="700" fill="currentColor" font-family="Figtree, sans-serif" text-anchor="middle">
+    {Array.from({ length: n }, (_, i) => <text x={largeurCh * i + largeurCh / 2} y="24">ch.{i + 1}</text>)}
+    <text x="39" y={n ? 68 : 48}>séjour</text>
+    <text x="99" y={n ? 56 : 36}>cuisine</text>
+    <text x="99" y="81">sdb</text>
+  </g>
+</svg>

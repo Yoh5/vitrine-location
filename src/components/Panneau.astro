@@ -1,0 +1,19 @@
+---
+import Plan from './Plan.astro';
+import { dh, type Logement } from '../lib/sakan';
+interface Props { l: Logement; niveau?: 'h1' | 'h2'; lien?: boolean }
+const { l, niveau = 'h2', lien = true } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const Titre = niveau;
+---
+<article class="panneau" data-logement={l.id}>
+  <p class="a-louer" aria-hidden="true"><span class="titre-peint">À louer</span><span class="arabe" lang="ar">للكراء</span></p>
+  <Titre>{l.titre}</Titre>
+  <p class="lieu">{l.ville} · {l.quartier}</p>
+  <p class="gabarit">{l.capacite} personne{l.capacite > 1 ? 's' : ''} · {l.chambres ? `${l.chambres} chambre${l.chambres > 1 ? 's' : ''}` : 'studio'}{l.sejour_min > 1 ? ` · ${l.sejour_min} nuits min.` : ''}</p>
+  <p class="prix-peint">{dh(l.prix_nuit)} <small>la nuit</small></p>
+  <p class="tarifs">{[l.prix_semaine && `${dh(l.prix_semaine)} la semaine`, l.prix_mois && `${dh(l.prix_mois)} le mois`].filter(Boolean).join(' · ') || 'Tarif à la nuit seulement'}</p>
+  <Plan chambres={l.chambres} class="plan" titre={l.titre} />
+  {lien && <a class="btn btn-rouge" href={`${base}/logement/${l.slug}/`}>Voir les dates</a>}
+  <p class="bande" hidden data-bande></p>
+</article>

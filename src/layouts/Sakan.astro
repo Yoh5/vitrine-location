@@ -1,4 +1,5 @@
 ---
+import '../styles/polices.css';
 import '../styles/sakan.css';
 interface Props { titre: string; description?: string; page?: 'logements' | 'espace' | 'connexion' | null; prive?: boolean }
 const { titre, description = 'Sakan : logements à louer au Maroc, à la nuit, à la semaine ou au mois. Démonstration.', page = null, prive = false } = Astro.props;
@@ -14,9 +15,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     {prive && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#1c1712" />
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Figtree:wght@400;600;700;800&family=Marhey:wght@600;700&display=swap" />
+    <link rel="preload" href="/polices/big-shoulders-display-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <header class="rue">
@@ -28,7 +27,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <nav class="nav" aria-label="Navigation">
           <a href={`${base}/`} aria-current={page === 'logements' ? 'page' : undefined}>Logements</a>
           <a href={`${base}/espace/`} aria-current={page === 'espace' ? 'page' : undefined} id="lien-espace">Mon espace</a>
-          <a href={`${base}/connexion/`} aria-current={page === 'connexion' ? 'page' : undefined} id="lien-connexion">Se connecter</a>
+          <span class="essai" id="lien-connexion">Essayer en{' '}<a href={`${base}/connexion/?demo=proprietaire`}>propriétaire</a>{' '}ou{' '}<a href={`${base}/connexion/?demo=locataire`}>locataire</a></span>
           <button type="button" class="sortir" id="sortir" hidden>Sortir</button>
         </nav>
       </div>
@@ -38,7 +37,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </main>
     <footer class="pied">
       <div class="cadre">
-        <p><strong>Démonstration.</strong> Sakan est fictif : les logements, les personnes et les téléphones sont inventés,
+        <p><strong>Démonstration.</strong> Sakan est fictif : les logements, les personnes et les téléphones sont inventés,
           aucune réservation n’est réelle et aucun paiement n’est pris. Réalisé par Axel Aho, développeur freelance.{' '}
           <a href="https://github.com/Yoh5/vitrine-location" rel="noopener">Code et tests</a></p>
       </div>

@@ -76,7 +76,7 @@ export function monterCalendrier(racine: HTMLElement, prises: Periode[], quandCh
       while (k + 1 < cases.length && cases[k + 1] && pris.has(cases[k + 1]) && ligne(k + 1) === ligne(i)) k++;
       const bande = document.createElement('span');
       bande.className = 'bande-jours'; bande.setAttribute('aria-hidden', 'true');
-      bande.textContent = k > i ? 'Loué' : '';
+      bande.textContent = 'Loué';
       bande.style.gridRow = String(ligne(i));
       bande.style.gridColumn = `${(i % 7) + 1} / ${(k % 7) + 2}`;
       grille.append(bande);
@@ -91,8 +91,8 @@ export function monterCalendrier(racine: HTMLElement, prises: Periode[], quandCh
     const nav = document.createElement('div'); nav.className = 'mois-tete';
     const titre = document.createElement('p'); titre.className = 'sr'; titre.textContent = 'Disponibilités';
     const boutons = document.createElement('div'); boutons.className = 'mois-nav';
-    const prec = document.createElement('button'); prec.type = 'button'; prec.textContent = '‹'; prec.setAttribute('aria-label', 'Mois précédent');
-    const suiv = document.createElement('button'); suiv.type = 'button'; suiv.textContent = '›'; suiv.setAttribute('aria-label', 'Mois suivant');
+    const prec = document.createElement('button'); prec.type = 'button'; prec.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>'; prec.setAttribute('aria-label', 'Mois précédent');
+    const suiv = document.createElement('button'); suiv.type = 'button'; suiv.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'; suiv.setAttribute('aria-label', 'Mois suivant');
     const ceMois = new Date(); ceMois.setDate(1);
     prec.disabled = premier <= ceMois;
     prec.addEventListener('click', () => { premier = new Date(premier.getFullYear(), premier.getMonth() - 1, 1); rendre(); });

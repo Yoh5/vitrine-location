@@ -33,6 +33,8 @@ begin
   insert into demandes (logement_id, locataire, debut, fin, personnes, prix_total, detail_prix, message)
   select 4, '22222222-0000-0000-0000-000000000001', j + 70, j + 77, 3, (calculer_prix(4, j + 70, j + 77)->>'total')::int,
          calculer_prix(4, j + 70, j + 77), 'Une semaine au bord de la mer en famille.';
+  -- Agdal est pris cette semaine (blocage du propriétaire) : la bande « LOUÉ » se voit dès le premier écran
+  insert into indisponibilites (logement_id, debut, fin, raison) values (2, j + 1, j + 4, 'famille');
   -- le propriétaire bloque Chefchaouen pour travaux
   insert into indisponibilites (logement_id, debut, fin, raison) values (5, j + 3, j + 9, 'peinture');
 end $$;

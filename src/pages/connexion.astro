@@ -8,17 +8,17 @@ const demo = {
 <Sakan titre="Se connecter · Sakan (démonstration)" page="connexion" prive>
   <div class="cadre">
     <h1 class="titre-peint">Entrer dans Sakan</h1>
-    <p class="chapeau">Deux comptes de démonstration, un pour chaque côté de la location. Essayez les deux : demandez des dates
+    <p class="chapeau">Deux comptes de démonstration, un pour chaque côté de la location. Essayez les deux : demandez des dates
       en locataire, puis acceptez-les en propriétaire.</p>
     <div class="porte">
       <div class="panneau">
         <h2>Je loue mon logement</h2>
-        <p>Hajja Fatima, propriétaire de six logements : demandes reçues, conflits signalés, dates bloquées.</p>
+        <p>Hajja Fatima, propriétaire de six logements : demandes reçues, conflits signalés, dates bloquées.</p>
         <button class="btn btn-plein" type="button" data-demo="proprietaire" data-email={demo.proprietaire[0]} data-mdp={demo.proprietaire[1]}>Entrer comme propriétaire</button>
       </div>
       <div class="panneau">
         <h2>Je cherche un logement</h2>
-        <p>Un locataire de démonstration : demandez des dates, suivez vos demandes, annulez.</p>
+        <p>Un locataire de démonstration : demandez des dates, suivez vos demandes, annulez.</p>
         <button class="btn btn-plein" type="button" data-demo="locataire" data-email={demo.locataire[0]} data-mdp={demo.locataire[1]}>Entrer comme locataire</button>
       </div>
     </div>
@@ -51,6 +51,9 @@ const demo = {
     if (!b.dataset.email) { err.textContent = 'Comptes de démonstration non configurés sur cette copie.'; err.hidden = false; return; }
     entrer(b.dataset.email, b.dataset.mdp ?? '', b);
   }));
+  // lien direct depuis l'en-tête : ?demo=proprietaire ou ?demo=locataire
+  const demande = new URLSearchParams(location.search).get('demo');
+  if (demande) document.querySelector<HTMLButtonElement>(`[data-demo="${demande}"]`)?.click();
   document.getElementById('form')!.addEventListener('submit', (e) => {
     e.preventDefault();
     entrer((document.getElementById('email') as HTMLInputElement).value, (document.getElementById('mdp') as HTMLInputElement).value, document.getElementById('entrer') as HTMLButtonElement);

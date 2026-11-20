@@ -45,6 +45,10 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1.
 .enseigne-latin { font-family: var(--f-peint); font-weight: 900; font-size: 2rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--facade); line-height: 1; }
 .enseigne-arabe { font-family: var(--f-arabe); font-weight: 700; font-size: 1.5rem; color: var(--planche); line-height: 1; }
 .nav { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+.essai { color: var(--planche); font-weight: 600; padding-inline: 0.5rem; }
+.nav .essai a { display: inline; min-height: 0; padding: 0; color: var(--facade); text-decoration: underline; text-underline-offset: 0.2em; }
+.retour svg { margin-inline-end: 0.35rem; }
+.mois-nav button { display: grid; place-items: center; }
 .nav a, .sortir { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 0.75rem; border-radius: var(--r); color: var(--planche); text-decoration: none; font-weight: 600; background: none; border: 0; cursor: pointer; }
 .nav a:hover, .sortir:hover { background: rgb(255 255 255 / 0.08); }
 .nav a[aria-current='page'] { color: var(--facade); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.35em; }
@@ -110,8 +114,8 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 .carte-bloc h2 { font-family: var(--f-peint); font-weight: 900; text-transform: uppercase; margin: 0 0 0.5rem; font-size: 1.3rem; }
 .carte { display: block; width: 100%; height: auto; }
 .carte .terre { fill: var(--planche); stroke: var(--peinture); stroke-width: 2; stroke-linejoin: round; }
-.carte .epingle circle { fill: var(--rouge); stroke: var(--planche); stroke-width: 2; }
-.carte .epingle text { font: 700 14px var(--f-texte); fill: var(--peinture); paint-order: stroke; stroke: var(--planche); stroke-width: 4px; }
+.carte .epingle circle { fill: var(--rouge); stroke: var(--planche); stroke-width: 3; }
+.carte .epingle text { font: 800 24px var(--f-texte); fill: var(--peinture); paint-order: stroke; stroke: var(--planche); stroke-width: 4px; }
 .carte a:hover circle, .carte a:focus-visible circle { fill: var(--peinture); }
 .carte-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--peinture-douce); }
 
@@ -139,7 +143,7 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 .grille { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .grille .jsem { text-align: center; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--peinture-douce); padding-block-end: 0.2rem; }
 .jour {
-  position: relative; aspect-ratio: 1; min-height: 40px; display: grid; place-items: center; border: 1px solid var(--planche-ombre);
+  position: relative; aspect-ratio: 1; min-height: 40px; display: grid; place-items: start center; padding-top: 0.35rem; border: 1px solid var(--planche-ombre);
   background: var(--planche); border-radius: 2px; font-weight: 700; cursor: pointer; font-variant-numeric: tabular-nums;
 }
 .jour:hover:not(:disabled) { border-color: var(--peinture); }
@@ -151,9 +155,9 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 .jour.dans { background: var(--surligne); border-color: #e2cf6a; }
 .jour.aujourdhui { box-shadow: inset 0 -3px 0 var(--rouge); }
 .bande-jours {
-  z-index: 1; pointer-events: none; align-self: center; height: 1.35rem; rotate: -3deg; margin-inline: -2px;
+  z-index: 1; pointer-events: none; align-self: end; margin-block-end: 0.3rem; height: 0.95rem; rotate: -3deg; margin-inline: -2px;
   background: var(--rouge); color: var(--planche); display: grid; place-items: center; overflow: hidden;
-  font-family: var(--f-peint); font-weight: 900; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--f-peint); font-weight: 900; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1;
   box-shadow: 0 2px 4px rgb(0 0 0 / 0.22);
 }
 .legende { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.85rem; color: var(--peinture-douce); }
@@ -222,4 +226,6 @@ h1.titre-peint { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem); }
 .pied p { margin: 0; max-width: 90ch; }
 .pied strong { color: var(--facade); }
 
-@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+.bande-collee { top: 3.4rem; left: auto; right: -2.6rem; width: 11rem; rotate: 28deg; animation: coller 420ms var(--ease) both; }
+@keyframes coller { from { opacity: 0; scale: 1.6; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .bande-collee { animation: none; } }

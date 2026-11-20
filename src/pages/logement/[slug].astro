@@ -12,7 +12,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <Sakan titre={`${l.titre} · ${l.ville} · Sakan (démonstration)`} description={`${l.titre} à ${l.ville}, ${dh(l.prix_nuit)} la nuit. Démonstration.`} page="logements">
   <div class="cadre">
-    <a class="retour" href={`${base}/`}>← Tous les logements</a>
+    <a class="retour" href={`${base}/`}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>Tous les logements</a>
     <div class="fiche">
       <div>
         <Panneau l={l} niveau="h1" lien={false} />
@@ -49,7 +49,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             <textarea id="message" maxlength="500" placeholder="Heure d’arrivée, raison du séjour…"></textarea>
           </div>
           <button class="btn btn-rouge" type="submit" id="envoyer">Demander ces dates</button>
-          <p class="calme" id="note-connexion" hidden>Il faut un compte locataire : <a href={`${base}/connexion/?retour=/logement/${l.slug}/`}>entrez avec le compte de démonstration</a>.</p>
+          <p class="calme" id="note-connexion" hidden>Il faut un compte locataire : <a href={`${base}/connexion/?retour=/logement/${l.slug}/`}>entrez avec le compte de démonstration</a>.</p>
         </form>
         <p class="erreur" id="erreur" role="alert" hidden></p>
         <p class="succes" id="succes" role="status" hidden></p>
@@ -77,7 +77,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     const t = ++tour;
     if (!c.debut || !c.fin) {
       $('devis').hidden = true; $('demande').hidden = true;
-      if (c.debut) { $('d-dates').textContent = `Arrivée le ${jour(c.debut)} : touchez le jour de départ.`; $('devis').hidden = false; $('d-detail').replaceChildren(); $('d-total').textContent = ''; $('d-eco').hidden = true; }
+      if (c.debut) { $('d-dates').textContent = `Arrivée le ${jour(c.debut)} : touchez le jour de départ.`; $('devis').hidden = false; $('d-detail').replaceChildren(); $('d-total').textContent = ''; $('d-eco').hidden = true; }
       return;
     }
     try {
@@ -93,7 +93,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const connecte = !!lireSession();
       $('note-connexion').hidden = connecte;
       ($('envoyer') as HTMLButtonElement).textContent = connecte ? 'Demander ces dates' : 'Se connecter pour demander';
-      if (!d.libre) erreur('Ces dates viennent d’être prises : choisissez-en d’autres.');
+      if (!d.libre) erreur('Ces dates viennent d’être prises : choisissez-en d’autres.');
     } catch (e) {
       if (t !== tour) return;
       $('devis').hidden = true; $('demande').hidden = true;
@@ -109,7 +109,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     b.disabled = true; b.textContent = 'La base vérifie les dates…'; erreur(null);
     try {
       const r = await demander(id, choix.debut, choix.fin, Number(($('personnes') as HTMLSelectElement).value), ($('message') as HTMLTextAreaElement).value);
-      $('succes').textContent = `Demande envoyée : ${dh(r.prix_total)} pour ${r.nuits} nuit${r.nuits > 1 ? 's' : ''}. Le propriétaire répond depuis son espace ; suivez-la dans « Mon espace ».`;
+      $('succes').textContent = `Demande envoyée : ${dh(r.prix_total)} pour ${r.nuits} nuit${r.nuits > 1 ? 's' : ''}. Le propriétaire répond depuis son espace ; suivez-la dans « Mon espace ».`;
       $('succes').hidden = false; $('demande').hidden = true;
     } catch (x) {
       erreur(message(x));

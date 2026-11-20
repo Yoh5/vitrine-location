@@ -20,7 +20,7 @@ import Sakan from '../layouts/Sakan.astro';
         </div>
         <div class="vide">
           <p><strong>Comment ça marche.</strong> Votre demande attend la réponse du propriétaire. S’il l’accepte, son téléphone
-            apparaît ici et les nuits sont à vous : personne d’autre ne peut plus les prendre. S’il en accepte une autre sur
+            apparaît ici et les nuits sont à vous : personne d’autre ne peut plus les prendre. S’il en accepte une autre sur
             les mêmes dates, la vôtre est refusée automatiquement, avec la raison.</p>
         </div>
       </div>
@@ -63,8 +63,11 @@ import Sakan from '../layouts/Sakan.astro';
     return p;
   }
 
+  let vientDAccepter: number | null = null;
   function fiche(d: Demande, cote: 'locataire' | 'proprietaire', toutes: Demande[] = []): HTMLLIElement {
     const li = el('li', 'fiche-demande');
+    // le geste de l'acceptation : la bande LOUÉ se colle sur la fiche qu'on vient d'accepter
+    if (d.id === vientDAccepter) { const b = el('span', 'bande bande-collee', 'Loué'); b.setAttribute('aria-hidden', 'true'); li.append(b); }
     const tete = el('div', 'tete');
     const h = el('h3'); const a = el('a', undefined, d.logement.titre); a.href = `${base}/logement/${d.logement.slug}/`; h.append(a);
     tete.append(h, el('span', `statut s-${d.statut}`, STATUTS[d.statut]));
@@ -74,7 +77,7 @@ import Sakan from '../layouts/Sakan.astro';
     const prix = el('p'); prix.append(el('span', 'prix nombre', dh(d.prix_total)));
     li.append(prix);
     if (d.message) li.append(el('p', 'msg', `« ${d.message} »`));
-    if (d.motif && d.statut !== 'acceptee') li.append(el('p', 'calme', `Motif : ${d.motif}`));
+    if (d.motif && d.statut !== 'acceptee') li.append(el('p', 'calme', `Motif : ${d.motif}`));
     if (d.statut === 'acceptee' && d.autre.telephone) li.append(contact(d.autre.nom, d.autre.telephone));
     if (d.statut === 'en_attente' && !d.autre.telephone) li.append(el('p', 'calme', 'Le téléphone s’affichera après acceptation.'));
 
@@ -86,11 +89,11 @@ import Sakan from '../layouts/Sakan.astro';
     }
     if (cote === 'proprietaire' && d.statut === 'en_attente') {
       const rivales = toutes.filter((x) => x.id !== d.id && x.statut === 'en_attente' && x.logement.id === d.logement.id && x.debut < d.fin && x.fin > d.debut);
-      if (rivales.length) li.append(el('p', 'conflit', `En conflit avec ${rivales.map((x) => `la demande de ${x.autre.nom} (${jour(x.debut)} → ${jour(x.fin)})`).join(' et ')} : accepter celle-ci refusera l’autre automatiquement.`));
+      if (rivales.length) li.append(el('p', 'conflit', `En conflit avec ${rivales.map((x) => `la demande de ${x.autre.nom} (du ${jour(x.debut)} au ${jour(x.fin)})`).join(' et ')} : accepter celle-ci refusera l’autre automatiquement.`));
       const ok = el('button', 'btn btn-rouge', 'Accepter'); ok.type = 'button';
       ok.addEventListener('click', async () => {
         ok.disabled = true; ok.textContent = 'La base vérifie les dates…';
-        try { const r = await accepter(d.id); err(null); await charger(r.refusees_d_office ? `Accepté. ${r.refusees_d_office} demande en conflit refusée automatiquement.` : 'Accepté.'); }
+        try { const r = await accepter(d.id); err(null); vientDAccepter = d.id; await charger(r.refusees_d_office ? `Accepté. ${r.refusees_d_office} demande en conflit refusée automatiquement.` : 'Accepté.'); }
         catch (e) { err(message(e)); ok.disabled = false; ok.textContent = 'Accepter'; if (e instanceof ErreurSakan && e.code === 'deja_close') charger(); }
       });
       const non = el('button', 'btn', 'Refuser'); non.type = 'button';
@@ -138,7 +141,7 @@ import Sakan from '../layouts/Sakan.astro';
     try {
       const m = await moi();
       $('titre').textContent = m.role === 'proprietaire' ? 'Espace propriétaire' : 'Espace locataire';
-      $('role').textContent = info ?? `Connecté : ${m.nom}`;
+      $('role').textContent = info ?? `Connecté : ${m.nom}`;
       if (m.role === 'locataire') {
         $('locataire').hidden = false;
         const ds = await mesDemandes();
@@ -150,6 +153,8 @@ import Sakan from '../layouts/Sakan.astro';
         ds.sort((a, b) => ordre(a) - ordre(b) || a.debut.localeCompare(b.debut));
         $('recues').replaceChildren(...ds.map((d) => fiche(d, 'proprietaire', ds)));
         $('logements').replaceChildren(...ls.map(blocLogement));
+        // on montre la fiche qu'on vient d'accepter, avec sa bande collée
+        document.querySelector('.bande-collee')?.closest('li')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       }
     } catch (e) {
       if (e instanceof ErreurSakan && (e.code === 'non_connecte' || e.code === 'acces_refuse')) { location.replace(`${base}/connexion/?retour=/espace/`); return; }

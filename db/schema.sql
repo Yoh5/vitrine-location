@@ -21,7 +21,7 @@ create table if not exists profils (
 
 create table if not exists logements (
   id            serial primary key,
-  proprietaire  uuid not null references profils(user_id),
+  proprietaire  uuid not null references profils(user_id) on update cascade,
   slug          text not null unique,
   titre         text not null,
   ville         text not null,
@@ -44,7 +44,7 @@ create table if not exists logements (
 create table if not exists demandes (
   id           serial primary key,
   logement_id  integer not null references logements(id),
-  locataire    uuid not null references profils(user_id),
+  locataire    uuid not null references profils(user_id) on update cascade,
   debut        date not null,                 -- nuit d'arrivée
   fin          date not null,                 -- jour de départ (exclu)
   personnes    integer not null check (personnes between 1 and 20),
